@@ -1,165 +1,350 @@
-# Sh4d0w_St4lk3r — Behavioral Threat Intelligence & Anomaly Detection Platform
+# 🛡️ Sh4d0w_St4lk3r
 
-> **Phase 3: Behavioral Feature Engineering**  
-> Sliding time windows (60s, 5m, 15m), entity-relationship extraction, authentication/network/cross-entity behavioral evidence calculation, and SQLite feature snapshot persistence.
+## Behavioral Threat Intelligence & Real-Time SOC Platform
+
+> **Detect behavior. Correlate evidence. Explain risk. Investigate threats.**
+
+Sh4d0w_St4lk3r is an AI-powered cybersecurity platform designed to detect **distributed and low-and-slow attacks** that traditional IP-based security rules can miss.
+
+The system combines **statistical baselines, Isolation Forest, behavioral clustering, deterministic security rules, cross-entity correlation, and explainable risk scoring** into a real-time SOC workflow.
 
 ---
 
-## 📁 Project Structure
+## 🚨 Problem
+
+Modern banking infrastructure generates huge volumes of legitimate authentication and network activity.
+
+Attackers can hide inside this traffic by distributing their activity across hundreds or thousands of IP addresses.
+
+For example:
 
 ```text
+IP-001 → 2 failed logins → NORMAL
+IP-002 → 1 failed login  → NORMAL
+IP-003 → 2 failed logins → NORMAL
+...
+IP-500 → 1 failed login  → NORMAL
+
+Traditional detection may consider every IP individually and generate no alert.
+
+But collectively:
+
+500 IPs
+   ↓
+Same target accounts
+   ↓
+Same time window
+   ↓
+High IP diversity
+   ↓
+Abnormal account targeting
+   ↓
+Coordinated Attack
+The key idea
+
+An individual source can look normal while collective behavior reveals the attack.
+
+🧠 How Sh4d0w_St4lk3r Works
+🔍 Detection Engine<img width="4605" height="752" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/df5021e3-2a90-4b37-89c5-32293d42814e" />
+
+
+Sh4d0w_St4lk3r uses multiple independent detection methods.
+
+Statistical Baseline
+
+Behavior is compared against expected historical patterns using statistical deviation and Z-scores.
+
+z = (x - mean) / standard_deviation
+Isolation Forest
+
+Detects unusual combinations of behavioral features and produces a normalized anomaly score.
+
+Behavioral Clustering
+
+KMeans-based behavioral clusters identify observations that significantly deviate from normal behavioral regions.
+
+Deterministic Rules
+
+Security-specific rules detect patterns such as:
+
+Distributed brute force
+Credential stuffing
+Port scanning
+High source-IP diversity
+Abnormal timing
+Target concentration
+🎯 Explainable Risk Score
+
+Every detection produces a 0–100 Threat Risk Score.
+
+Detection Signal	Maximum Contribution
+Statistical Baseline	25
+Isolation Forest	25
+Behavioral Clustering	20
+Deterministic Rules	20
+Cross-Entity Correlation	10
+Total	100
+Severity
+0–39     LOW
+40–64    MEDIUM
+65–84    HIGH
+85–100   CRITICAL
+
+The score represents the strength of available security evidence, not a probability of compromise.
+
+🔗 Cross-Entity Correlation
+
+This is the core of the platform.
+
+Instead of looking only at an IP, the system correlates:
+
+This allows the platform to detect coordinated attacks even when individual IPs remain below normal thresholds.
+
+Example
+500 source IPs
++
+200 targeted accounts
++
+95% authentication failures
++
+unseen devices
++
+same time window
+
+can become strong evidence of credential stuffing.
+
+🖥️ SOC Workflow
+
+The SOC dashboard provides:
+
+Real-time telemetry
+Live threat/risk score
+Active alerts
+Critical threats
+Alert investigation
+Analyst assignment
+Investigation checklist
+Case management
+Attack topology
+Kill-chain context
+Detection analytics
+Threat reports
+🎯 Attack Scenarios
+
+The built-in simulator provides controlled synthetic attack scenarios.
+
+1. Distributed Low-and-Slow Brute Force
+~500 IPs
+↓
+1–2 attempts/IP
+↓
+Few targeted accounts
+↓
+High source diversity
+↓
+Distributed attack
+
+Expected risk: 75–95
+
+2. Credential Stuffing
+~300 IPs
+↓
+~200 accounts
+↓
+~95% failures
+↓
+Unseen devices
+↓
+Credential stuffing
+
+Expected risk: 80–98
+
+3. Port Scanning
+1–5 scanner IPs
+↓
+50–200 ports
+↓
+High refused/timeout rate
+↓
+Reconnaissance
+
+Expected risk: 60–85
+
+4. Normal Traffic
+
+Used for behavioral baselines, model training, and comparison.
+
+All attack data is synthetic and deterministic.
+
+⚙️ Technology Stack
+Backend
+Python
+FastAPI
+SQLAlchemy
+SQLite
+Pydantic
+Scikit-learn
+Joblib
+WebSockets
+Pytest
+Frontend
+React
+TypeScript
+Vite
+Tailwind CSS
+React Router
+Recharts
+React Flow
+Lucide React
+📁 Project Structure
+Threat-detection-monetoring/
+│
 ├── backend/
-│   ├── api/             # API routers (/health, /api/events, /api/features)
-│   ├── detection/       # Anomaly & signature detection engines (Phase 4+)
-│   ├── features/        # Feature windows, calculator, service, and schemas
-│   ├── ingestion/       # EventBus, DeadLetterQueue, BackgroundConsumer
-│   ├── models/          # CanonicalEvent, TelemetryEventDB, FeatureSnapshotDB
-│   ├── repositories/    # EventRepository, FeatureRepository (SQLite persistence)
-│   ├── reports/         # PDF and threat report generators (Phase 4+)
-│   ├── db/              # Database engine, session, and base DeclarativeBase
-│   ├── config.py        # pydantic-settings configuration
-│   └── main.py          # FastAPI application entrypoint & lifespan
-├── frontend/            # React web dashboard (Phase 4+)
-├── simulator/           # Deterministic telemetry simulator
-│   ├── generators/      # AUTH, NETWORK, and SYSTEM generators
-│   ├── scenarios/       # Normal baseline scenario configuration
-│   └── cli/             # CLI simulator runner
+│   ├── alerts/
+│   ├── api/
+│   ├── db/
+│   ├── detection/
+│   ├── features/
+│   ├── ingestion/
+│   ├── models/
+│   ├── realtime/
+│   ├── reports/
+│   ├── repositories/
+│   ├── risk/
+│   └── simulation/
+│
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       └── services/
+│
+├── simulator/
 ├── tests/
-│   ├── unit/            # Unit tests (canonical, queue, db, simulator, features)
-│   ├── integration/     # Integration tests (ingestion & features APIs)
-│   └── ws/              # WebSocket tests (Phase 4+)
-├── docs/                # Architecture blueprints and design documentation
-├── .env.example         # Example environment configuration
-├── .gitignore           # Git ignore rules
-├── requirements.txt     # Python project dependencies
-└── README.md            # Getting started guide
-```
-
----
-
-## 🚀 Quickstart Guide
-
-### 1. Create a Virtual Environment
-
-Open your terminal in the project root directory:
-
-```bash
-# Windows
+├── docs/
+├── artifacts/
+├── requirements.txt
+└── README.md
+🚀 Quick Start
+Clone
+git clone https://github.com/gupta09-oop/Threat-detection-monetoring.git
+cd Threat-detection-monetoring
+Backend
 python -m venv .venv
-.venv\Scripts\activate
 
-# Linux / macOS
-python3 -m venv .venv
-source .venv/bin/activate
-```
+Windows:
 
-### 2. Install Requirements
+.venv\Scripts\Activate.ps1
 
-```bash
+Install dependencies:
+
 pip install -r requirements.txt
-```
 
-*(Optional) Configure local environment variables:*
-```bash
-# Windows (cmd)
-copy .env.example .env
+Start backend:
 
-# Windows (PowerShell) / Linux / macOS
-cp .env.example .env
-```
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8099
+Frontend
 
-### 3. Start FastAPI
+Open another terminal:
 
-Run the application using Uvicorn:
+cd frontend
+npm install
+npm run dev
 
-```bash
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
-```
+Backend health:
 
-The application will start at `http://127.0.0.1:8000`.
+http://127.0.0.1:8099/health
+🧪 Run the Demo
+Normal
+python -m simulator.cli --scenario normal --seed 42 --count 50
+Distributed Brute Force
+python -m simulator.cli --scenario distributed_bruteforce --seed 42 --count 500
+Credential Stuffing
+python -m simulator.cli --scenario credential_stuffing --seed 42
+Port Scan
+python -m simulator.cli --scenario port_scan --seed 42
+Complete Demo
+python -m simulator.cli --demo --seed 42
+🏆 5-Minute Demo Story
 
-### 4. Open Swagger Documentation
+The recommended demonstration follows:
 
-Once the server is running, explore the interactive OpenAPI documentation:
+NORMAL
+  ↓
+Attack Begins
+  ↓
+Individual IPs Look Normal
+  ↓
+Collective Behavior Becomes Abnormal
+  ↓
+Multiple Detectors Trigger
+  ↓
+Anomaly Fusion
+  ↓
+Risk Score Increases
+  ↓
+Alert Created
+  ↓
+Analyst Investigates
+  ↓
+Case Resolved
+  ↓
+Threat Report Generated
 
-- **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-- **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+The key message to the judges:
 
-#### Verify the Health Check
+"We don't need one obviously malicious IP. We identify the coordinated behavior across IPs, accounts, devices, destinations, and time."
 
-```bash
-curl http://127.0.0.1:8000/health
-```
+📊 Traditional Detection vs Sh4d0w_St4lk3r
+Traditional Approach	Sh4d0w_St4lk3r
+IP-centric	Cross-entity behavioral
+Fixed thresholds	Statistical baselines
+Signature/rule focused	Rules + ML + behavioral signals
+Individual events	Collective behavior
+Alert-heavy	Deduplication + case correlation
+Limited context	Investigation context
+Difficult to explain complex behavior	Explainable risk breakdown
+🛣️ Future Roadmap
 
-Expected response:
-```json
-{
-  "status": "healthy",
-  "service": "Sh4d0w_St4lk3r",
-  "version": "1.0.0"
-}
-```
+The current version is optimized for a hackathon/MVP environment.
 
-### 5. Ingest Telemetry
+Future production improvements could include:
 
-Ingest a single event or a batch of events:
+Apache Kafka / distributed streaming
+PostgreSQL
+Distributed model serving
+Multi-region deployment
+Enterprise authentication
+RBAC
+Audit logging
+Centralized observability
+Model monitoring
+Detection-quality monitoring
+🔐 Security & Scope
 
-```bash
-curl -X POST http://127.0.0.1:8000/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "source_ip": "10.0.10.15",
-    "user_id": "alice.smith",
-    "login_result": "SUCCESS",
-    "auth_method": "MFA",
-    "device_id": "DEV-CORP-W10-01"
-  }'
-```
+Sh4d0w_St4lk3r is a cybersecurity research and demonstration platform.
 
-Query persisted events:
+All attack scenarios use synthetic data.
+No real banking customer data is required.
+The platform is human-in-the-loop.
+No destructive automated remediation is performed.
+The project does not claim 100% detection accuracy or zero false positives.
+📌 Project Goal
 
-```bash
-curl http://127.0.0.1:8000/api/events?limit=10
-```
+Sh4d0w_St4lk3r demonstrates how modern behavioral analytics can detect distributed attacks that traditional IP-centric security systems may overlook.
 
-### 6. Compute Behavioral Features
+It combines:
 
-Compute time-windowed feature snapshots (windows: 60s, 300s [5m], 900s [15m]):
+Behavioral Analytics
+        +
+Machine Learning
+        +
+Security Rules
+        +
+Cross-Entity Correlation
+        +
+Explainable Risk
+        +
+Real-Time SOC
 
-```bash
-# Calculate & persist features for a specific user over 5m
-curl -X POST http://127.0.0.1:8000/api/features/calculate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "window_seconds": 300,
-    "entity_type": "USER",
-    "entity_id": "alice.smith",
-    "persist": true
-  }'
-
-# Automatically calculate & persist snapshots for all active entities over 1m
-curl -X POST "http://127.0.0.1:8000/api/features/calculate-active?window_seconds=60"
-
-# Query persisted snapshots
-curl http://127.0.0.1:8000/api/features/snapshots?limit=5
-```
-
-### 7. Run the Telemetry Simulator
-
-Generate normal synthetic telemetry and send directly to the ingestion API:
-
-```bash
-# Generate 50 normal events to console
-python simulator/cli/main.py --count 50 --seed 42
-
-# Stream 100 events to running API
-python simulator/cli/main.py --count 100 --seed 42 --target-url http://127.0.0.1:8000/api/events
-```
-
-### 8. Run Tests
-
-Execute the automated test suite using `pytest`:
-
-```bash
-pytest -v
-```
+into one end-to-end threat detection and investigation platform.
