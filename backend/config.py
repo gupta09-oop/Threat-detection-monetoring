@@ -80,10 +80,9 @@ class Settings(BaseSettings):
     CASE_CORRELATION_WINDOW_SECONDS: int = 300
 
     # CORS
-    #
-    # Stored as a comma-separated string so Render can provide it
-    # without requiring an underscore in the environment variable key.
-    ALLOWED_ORIGINS: str = (
+    # Stored as a comma-separated string so it works directly
+    # with the Render environment variable ALLOWEDORIGINS.
+    ALLOWEDORIGINS: str = (
         "http://localhost:3000,"
         "http://localhost:5173,"
         "http://127.0.0.1:3000,"
