@@ -97,11 +97,20 @@ class AddNoteRequest(BaseModel):
     analyst: str = Field(default="Priya Sharma", description="Authoring analyst")
     text: str = Field(..., min_length=1, description="Analyst investigation note content")
 
-
 class ResolveRequest(BaseModel):
     """Payload to close/resolve an alert or incident case."""
-    resolution: str = Field(..., description="Resolution: Confirmed Threat, False Positive, Benign Activity, Other")
-    notes: Optional[str] = Field(default=None, description="Analyst closure explanation")
+    resolution: str = Field(
+        ...,
+        description="Resolution: Confirmed Threat, False Positive, Benign Activity, Other"
+    )
+    analyst: str = Field(
+        ...,
+        description="Analyst completing the resolution"
+    )
+    notes: Optional[str] = Field(
+        default=None,
+        description="Analyst closure explanation"
+    )
 
 
 class AlertEvaluateRequest(BaseModel):
