@@ -7,9 +7,10 @@ import { SeverityBadge, StatusBadge } from '../common/Badges';
 interface AlertTableProps {
   alerts: AlertResult[];
   isLoading?: boolean;
+  onSelectAlert?: (alert: AlertResult) => void;
 }
 
-export const AlertTable: React.FC<AlertTableProps> = ({ alerts, isLoading }) => {
+export const AlertTable: React.FC<AlertTableProps> = ({ alerts, isLoading, onSelectAlert }) => {
   if (isLoading) {
     return (
       <div className="bg-[#0d131d] border border-[#1c2638] rounded-xl p-6 text-center animate-pulse">
@@ -80,7 +81,16 @@ export const AlertTable: React.FC<AlertTableProps> = ({ alerts, isLoading }) => 
                     <span>{new Date(a.timestamp).toLocaleTimeString()}</span>
                   </span>
                 </td>
-                <td className="py-3 px-4 text-right">
+                <td className="py-3 px-4 text-right space-x-1.5">
+                  {onSelectAlert && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectAlert(a)}
+                      className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-800/60 text-cyan-300 text-xs font-mono transition-all cursor-pointer"
+                    >
+                      <span>Intel</span>
+                    </button>
+                  )}
                   <Link
                     to={`/alerts/${a.alert_id}`}
                     className="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-[#152132] hover:bg-cyan-950/60 hover:text-cyan-400 hover:border-cyan-800/60 border border-[#1c2638] text-xs font-mono transition-all text-slate-300"

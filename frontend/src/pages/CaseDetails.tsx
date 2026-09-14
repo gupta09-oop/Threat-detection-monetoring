@@ -21,6 +21,9 @@ import { AlertTable } from '../components/alerts/AlertTable';
 import { InvestigationChecklist } from '../components/investigation/InvestigationChecklist';
 import { AnalystNotesSection } from '../components/investigation/AnalystNotesSection';
 import { ResolutionModal } from '../components/investigation/ResolutionModal';
+import { CaseContextSidebar } from '../components/investigation/CaseContextSidebar';
+import { AttackIntelligencePanel } from '../components/investigation/AttackIntelligencePanel';
+import { ShieldCheck } from 'lucide-react';
 
 export const CaseDetailsPage: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
@@ -31,6 +34,7 @@ export const CaseDetailsPage: React.FC = () => {
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isAssigning, setIsAssigning] = useState<boolean>(false);
   const [isResolutionModalOpen, setIsResolutionModalOpen] = useState<boolean>(false);
+  const [isIntelligenceOpen, setIsIntelligenceOpen] = useState<boolean>(false);
 
   const fetchCase = async () => {
     if (!caseId) return;
@@ -237,6 +241,15 @@ export const CaseDetailsPage: React.FC = () => {
               TERMINAL ({incidentCase.status})
             </span>
           )}
+
+          <button
+            type="button"
+            onClick={() => setIsIntelligenceOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 shadow-[0_0_10px_rgba(0,210,255,0.15)]"
+          >
+            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span>Attack Intelligence</span>
+          </button>
         </div>
       </div>
 
@@ -314,38 +327,8 @@ export const CaseDetailsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Affected Entities */}
-        <div className="bg-[#0d131d] border border-[#1c2638] rounded-xl p-5 space-y-3">
-          <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-300 border-b border-[#1c2638] pb-2">
-            Correlated Entities
-          </h3>
-          <div className="space-y-2 text-xs font-mono">
-            <div>
-              <span className="text-slate-500 block text-[10px]">Source IPs:</span>
-              <div className="text-cyan-400 truncate max-w-full">
-                {(incidentCase.affected_entities.source_ips || []).join(', ') || 'None recorded'}
-              </div>
-            </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">Accounts:</span>
-              <div className="text-slate-200 truncate max-w-full">
-                {(incidentCase.affected_entities.accounts || []).join(', ') || 'None recorded'}
-              </div>
-            </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">Devices:</span>
-              <div className="text-purple-400 truncate max-w-full">
-                {(incidentCase.affected_entities.devices || []).join(', ') || 'None recorded'}
-              </div>
-            </div>
-            <div>
-              <span className="text-slate-500 block text-[10px]">Destination Ports:</span>
-              <div className="text-emerald-400 truncate max-w-full">
-                {(incidentCase.affected_entities.ports || []).join(', ') || 'None recorded'}
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* CASE CONTEXT Sidebar */}
+        <CaseContextSidebar incidentCase={incidentCase} />
       </div>
 
       {/* Recommended Response & Interactive Checklist */}
@@ -403,6 +386,14 @@ export const CaseDetailsPage: React.FC = () => {
         title={incidentCase.title}
         itemType="Case"
         currentAnalyst={currentAnalyst}
+      />
+
+      {/* Attack Intelligence Drawer */}
+      <AttackIntelligencePanel
+        incidentCase={incidentCase}
+        isOpen={isIntelligenceOpen}
+        onClose={() => setIsIntelligenceOpen(false)}
+        onUpdate={fetchCase}
       />
     </div>
   );

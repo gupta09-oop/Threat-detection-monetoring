@@ -34,7 +34,7 @@ class SimulationStartRequest(BaseModel):
     )
     duration_seconds: int = Field(
         default=30,
-        ge=5,
+        ge=1,
         le=300,
         description="Target simulation duration in seconds (individual: ~20-45s, showcase: ~120-180s)",
     )

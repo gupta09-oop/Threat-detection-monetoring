@@ -10,6 +10,7 @@ import { AlertTable } from '../components/alerts/AlertTable';
 import { LiveTelemetryFeed } from '../components/dashboard/LiveTelemetryFeed';
 import { AttackTopologyGraph } from '../components/topology/AttackTopologyGraph';
 import { LiveSimulationPanel } from '../components/dashboard/LiveSimulationPanel';
+import { AttackIntelligencePanel } from '../components/investigation/AttackIntelligencePanel';
 
 export const CommandCenterPage: React.FC = () => {
   const [alerts, setAlerts] = useState<AlertResult[]>([]);
@@ -18,6 +19,7 @@ export const CommandCenterPage: React.FC = () => {
   const [latestRisk, setLatestRisk] = useState<RiskScoreResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [selectedAlertForIntel, setSelectedAlertForIntel] = useState<AlertResult | null>(null);
 
   const loadDashboardData = async () => {
     try {
@@ -295,7 +297,11 @@ export const CommandCenterPage: React.FC = () => {
               {alerts.length} alerts in buffer
             </span>
           </div>
-          <AlertTable alerts={alerts.slice(0, 5)} isLoading={isLoading} />
+          <AlertTable
+            alerts={alerts.slice(0, 5)}
+            isLoading={isLoading}
+            onSelectAlert={(a) => setSelectedAlertForIntel(a)}
+          />
         </div>
 
         <div>
@@ -310,6 +316,14 @@ export const CommandCenterPage: React.FC = () => {
           <LiveTelemetryFeed events={events.slice(0, 8)} isLoading={isLoading} />
         </div>
       </div>
+
+      {/* Attack Intelligence Drawer */}
+      <AttackIntelligencePanel
+        alert={selectedAlertForIntel}
+        isOpen={!!selectedAlertForIntel}
+        onClose={() => setSelectedAlertForIntel(null)}
+        onUpdate={loadDashboardData}
+      />
     </div>
   );
 };

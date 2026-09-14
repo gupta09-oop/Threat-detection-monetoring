@@ -71,19 +71,25 @@ class ConnectionManager:
 
     def dispatch(self, event_type: str, data: Dict[str, Any]) -> None:
         """Synchronous dispatcher that schedules broadcast on active event loop."""
+        payload = {
+            "type": event_type,
+            "data": data,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._history.append(payload)
+        if len(self._history) > self._max_history:
+            self._history.pop(0)
+
         try:
             loop = asyncio.get_running_loop()
             loop.create_task(self.broadcast(event_type, data))
         except RuntimeError:
-            # If no running loop (e.g., sync CLI/unit test runner), log and store in history
-            payload = {
-                "type": event_type,
-                "data": data,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-            }
-            self._history.append(payload)
-            if len(self._history) > self._max_history:
-                self._history.pop(0)
+            if self.active_connections:
+                try:
+                    asyncio.run(self.broadcast(event_type, data))
+                except Exception:
+                    pass
+
 
 
 # Global singleton instance

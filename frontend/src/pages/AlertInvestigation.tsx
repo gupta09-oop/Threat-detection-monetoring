@@ -22,6 +22,8 @@ import { EvidenceCards } from '../components/dashboard/EvidenceCards';
 import { InvestigationChecklist } from '../components/investigation/InvestigationChecklist';
 import { AnalystNotesSection } from '../components/investigation/AnalystNotesSection';
 import { ResolutionModal } from '../components/investigation/ResolutionModal';
+import { CaseContextSidebar } from '../components/investigation/CaseContextSidebar';
+import { AttackIntelligencePanel } from '../components/investigation/AttackIntelligencePanel';
 
 export const AlertInvestigationPage: React.FC = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -31,6 +33,7 @@ export const AlertInvestigationPage: React.FC = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<boolean>(false);
   const [isAssigning, setIsAssigning] = useState<boolean>(false);
   const [isResolutionModalOpen, setIsResolutionModalOpen] = useState<boolean>(false);
+  const [isIntelligencePanelOpen, setIsIntelligencePanelOpen] = useState<boolean>(false);
 
   const fetchDetails = async () => {
     if (!alertId) return;
@@ -234,6 +237,15 @@ export const AlertInvestigationPage: React.FC = () => {
               TERMINAL (CLOSED)
             </span>
           )}
+
+          <button
+            type="button"
+            onClick={() => setIsIntelligencePanelOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-700/60 text-cyan-300 text-xs font-mono font-bold transition-all cursor-pointer flex items-center space-x-1.5 shadow-[0_0_10px_rgba(0,210,255,0.15)]"
+          >
+            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span>Attack Intelligence</span>
+          </button>
         </div>
       </div>
 
@@ -341,50 +353,54 @@ export const AlertInvestigationPage: React.FC = () => {
 
       {/* 2-Column Layout: Forensic Metadata & Notes / Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left: Investigation Summary */}
-        <div className="bg-[#0d131d] border border-[#1c2638] rounded-xl p-5 space-y-4">
-          <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-300 border-b border-[#1c2638] pb-2">
-            Investigation Summary
-          </h3>
+        {/* Left: CASE CONTEXT Sidebar */}
+        <div className="space-y-5">
+          <CaseContextSidebar alert={alert} />
 
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Risk Score:</span>
-              <span className="text-cyan-400 font-bold">{alert.risk_score.toFixed(1)} / 100</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Evidence Strength:</span>
-              <span className="text-slate-200">{alert.evidence_strength}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Assigned Analyst:</span>
-              <span className="text-cyan-300 font-semibold">{alert.assigned_analyst || 'Unassigned'}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Target Entity:</span>
-              <span className="text-slate-200 font-semibold">{alert.entity_id} ({alert.entity_type})</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Occurrence Count:</span>
-              <span className="text-slate-200">x{alert.occurrence_count} (Deduplicated)</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Deduplication Key:</span>
-              <span className="text-slate-300 text-[11px] truncate max-w-[160px]">{alert.dedup_key}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-[#162030]">
-              <span className="text-slate-500">Linked Incident Case:</span>
-              {alert.case_id ? (
-                <Link to={`/cases/${alert.case_id}`} className="text-cyan-400 hover:underline">
-                  {alert.case_id.slice(0, 12)}...
-                </Link>
-              ) : (
-                <span className="text-slate-600">None</span>
-              )}
-            </div>
-            <div className="flex justify-between py-1">
-              <span className="text-slate-500">Created:</span>
-              <span className="text-slate-400">{new Date(alert.created_at).toLocaleString()}</span>
+          <div className="bg-[#0d131d] border border-[#1c2638] rounded-xl p-5 space-y-4">
+            <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-300 border-b border-[#1c2638] pb-2">
+              Investigation Summary
+            </h3>
+
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Risk Score:</span>
+                <span className="text-cyan-400 font-bold">{alert.risk_score.toFixed(1)} / 100</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Evidence Strength:</span>
+                <span className="text-slate-200">{alert.evidence_strength}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Assigned Analyst:</span>
+                <span className="text-cyan-300 font-semibold">{alert.assigned_analyst || 'Unassigned'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Target Entity:</span>
+                <span className="text-slate-200 font-semibold">{alert.entity_id} ({alert.entity_type})</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Occurrence Count:</span>
+                <span className="text-slate-200">x{alert.occurrence_count} (Deduplicated)</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Deduplication Key:</span>
+                <span className="text-slate-300 text-[11px] truncate max-w-[160px]">{alert.dedup_key}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-[#162030]">
+                <span className="text-slate-500">Linked Incident Case:</span>
+                {alert.case_id ? (
+                  <Link to={`/cases/${alert.case_id}`} className="text-cyan-400 hover:underline">
+                    {alert.case_id.slice(0, 12)}...
+                  </Link>
+                ) : (
+                  <span className="text-slate-600">None</span>
+                )}
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-slate-500">Created:</span>
+                <span className="text-slate-400">{new Date(alert.created_at).toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -441,6 +457,14 @@ export const AlertInvestigationPage: React.FC = () => {
         title={alert.title}
         itemType="Alert"
         currentAnalyst={alert.assigned_analyst}
+      />
+
+      {/* Attack Intelligence Drawer */}
+      <AttackIntelligencePanel
+        alert={alert}
+        isOpen={isIntelligencePanelOpen}
+        onClose={() => setIsIntelligencePanelOpen(false)}
+        onUpdate={fetchDetails}
       />
     </div>
   );

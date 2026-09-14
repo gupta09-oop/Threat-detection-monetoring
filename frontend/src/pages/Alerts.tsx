@@ -4,12 +4,14 @@ import { api } from '../api/client';
 import { wsManager } from '../api/ws';
 import type { AlertResult } from '../types';
 import { AlertTable } from '../components/alerts/AlertTable';
+import { AttackIntelligencePanel } from '../components/investigation/AttackIntelligencePanel';
 
 export const AlertsPage: React.FC = () => {
   const [alerts, setAlerts] = useState<AlertResult[]>([]);
   const [severityFilter, setSeverityFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedAlertForIntel, setSelectedAlertForIntel] = useState<AlertResult | null>(null);
 
   const fetchAlerts = async () => {
     try {
@@ -91,7 +93,19 @@ export const AlertsPage: React.FC = () => {
         </div>
       </div>
 
-      <AlertTable alerts={alerts} isLoading={isLoading} />
+      <AlertTable
+        alerts={alerts}
+        isLoading={isLoading}
+        onSelectAlert={(a) => setSelectedAlertForIntel(a)}
+      />
+
+      {/* Attack Intelligence Drawer */}
+      <AttackIntelligencePanel
+        alert={selectedAlertForIntel}
+        isOpen={!!selectedAlertForIntel}
+        onClose={() => setSelectedAlertForIntel(null)}
+        onUpdate={fetchAlerts}
+      />
     </div>
   );
 };

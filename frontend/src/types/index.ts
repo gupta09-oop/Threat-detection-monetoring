@@ -191,6 +191,7 @@ export interface CaseResult {
     ports?: string[];
   };
   evidence_summary: Record<string, any>;
+  details?: Record<string, any>;
   risk_history: Array<{
     timestamp: string;
     score: number;
