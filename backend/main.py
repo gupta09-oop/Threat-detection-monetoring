@@ -31,17 +31,20 @@ from backend.detection.isolation_forest_service import isolation_forest_service
 from backend.detection.clustering_service import behavioral_clustering_service
 from backend.ingestion.consumer import consumer
 
+
 # Basic application logging configuration
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
+
 logger = logging.getLogger("sh4d0w_st4lk3r")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager to handle startup and shutdown events."""
+
     logger.info(
         "Starting up %s (version %s)...",
         settings.PROJECT_NAME,
@@ -62,6 +65,7 @@ async def lifespan(app: FastAPI):
 
     # Gracefully shut down background consumer and drain backlog
     await consumer.stop()
+
     logger.info("Shutting down %s...", settings.PROJECT_NAME)
 
 
@@ -75,14 +79,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=[
+        origin.strip()
+        for origin in settings.ALLOWEDORIGINS.split(",")
+        if origin.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Mount API Routers
 app.include_router(health_router)
@@ -105,7 +115,9 @@ app.include_router(reports_router)
 # Production frontend serving
 # ---------------------------------------------------------------------------
 
-FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+FRONTEND_DIST = (
+    Path(__file__).resolve().parent.parent / "frontend" / "dist"
+)
 
 if FRONTEND_DIST.exists():
     assets_dir = FRONTEND_DIST / "assets"
@@ -120,6 +132,7 @@ if FRONTEND_DIST.exists():
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         """Serve React frontend and support React Router client-side routes."""
+
         requested_file = FRONTEND_DIST / full_path
 
         if requested_file.is_file():
