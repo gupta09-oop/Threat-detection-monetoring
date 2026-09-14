@@ -1,0 +1,47 @@
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment configurations
+.env
+.env.local
+
+# Databases (SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Frontend build artifacts & dependencies
+node_modules/
+dist/
+build/
+.next/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# ML Model artifacts & persistence
+artifacts/
+models_store/
+*.joblib
+*.pkl

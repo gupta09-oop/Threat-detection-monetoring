@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #070b12;
+    --bg-card: #0d131d;
+    --bg-card-hover: #121a28;
+    --border-subtle: #1c2638;
+    --border-accent: #25334a;
+    --text-primary: #f0f4fc;
+    --text-secondary: #8b9bb4;
+    --text-muted: #566882;
+    --accent-cyan: #00d2ff;
+    --accent-blue: #3a86ff;
+  }
+
+  :root.light, html.light, body.light, .light {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --border-subtle: #e2e8f0;
+    --border-accent: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --accent-cyan: #0284c7;
+    --accent-blue: #2563eb;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  #root {
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    border-inline: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #070b12;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1c2638;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2b3a52;
+  }
+
+  .light ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  .light ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+  }
+  .light ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* ========================================================
+   LIGHT MODE ENTERPRISE SOC DESIGN OVERRIDES
+   ======================================================== */
+
+.light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.light [class*="bg-[#070b12]"] {
+  background-color: #f8fafc !important;
+}
+
+.light [class*="bg-[#0a0f18]"],
+.light [class*="bg-[#090e17]"],
+.light [class*="bg-[#0d131d]"] {
+  background-color: #ffffff !important;
+}
+
+.light [class*="bg-[#101724]"],
+.light [class*="bg-[#121a28]"],
+.light [class*="bg-[#0b101a]"],
+.light [class*="bg-[#162030]"] {
+  background-color: #f1f5f9 !important;
+}
+
+.light [class*="border-[#1c2638]"],
+.light [class*="border-[#182233]"],
+.light [class*="border-[#25334a]"] {
+  border-color: #e2e8f0 !important;
+}
+
+.light [class*="text-white"],
+.light [class*="text-slate-100"],
+.light [class*="text-slate-200"] {
+  color: #0f172a !important;
+}
+
+.light [class*="text-slate-300"] {
+  color: #334155 !important;
+}
+
+.light [class*="text-slate-400"] {
+  color: #475569 !important;
+}
+
+.light [class*="text-slate-500"] {
+  color: #64748b !important;
+}
+
+/* Accent highlights in light mode */
+.light [class*="bg-cyan-950/40"] {
+  background-color: #e0f2fe !important;
+  border-color: #7dd3fc !important;
+  color: #0284c7 !important;
+}
+
+.light [class*="text-cyan-400"] {
+  color: #0284c7 !important;
+}
+
+.light [class*="hover:bg-[#101724]"]:hover,
+.light [class*="hover:bg-[#121a28]"]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* React Flow canvas in light mode */
+.light .react-flow__background {
+  background-color: #f8fafc !important;
+}
+
+.light .react-flow__controls button {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light .react-flow__controls button:hover {
+  background-color: #f1f5f9 !important;
+}
+
+/* Card and container subtle box-shadow for light mode */
+.light [class*="bg-[#0d131d]"] {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
