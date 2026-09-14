@@ -1,7 +1,8 @@
 """Configuration and application settings for Sh4d0w_St4lk3r."""
 
 from typing import Dict, List, Union
-from pydantic import field_validator
+
+from pydantic import AliasChoices, Field, field_validator
 # pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -25,7 +26,8 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
 
-    # Database settings (SQLite for Phase 1 local development, ready for PostgreSQL/TimescaleDB)
+    # Database settings (SQLite for Phase 1 local development,
+    # ready for PostgreSQL/TimescaleDB)
     DATABASE_URL: str = "sqlite:///./sh4d0w_st4lk3r.db"
 
     # Ingestion queue and backpressure settings
@@ -58,7 +60,7 @@ class Settings(BaseSettings):
     CLUSTERING_MODEL_FILE: str = "behavioral_clustering.joblib"
 
     # Phase 7 Anomaly Fusion Settings
-    FUSION_CORRELATION_WINDOW_SECONDS: int = 300  # 5 minutes temporal correlation window
+    FUSION_CORRELATION_WINDOW_SECONDS: int = 300
 
     # Phase 8 Explainable Risk Scoring Settings
     RISK_STATISTICAL_MAX: float = 25.0
@@ -66,26 +68,45 @@ class Settings(BaseSettings):
     RISK_CLUSTERING_MAX: float = 20.0
     RISK_RULES_MAX: float = 20.0
     RISK_CORRELATION_MAX: float = 10.0
-    RISK_CORRELATION_MAP: Dict[int, float] = {0: 0.0, 1: 0.0, 2: 5.0, 3: 8.0, 4: 10.0}
+    RISK_CORRELATION_MAP: Dict[int, float] = {
+        0: 0.0,
+        1: 0.0,
+        2: 5.0,
+        3: 8.0,
+        4: 10.0,
+    }
 
     # Phase 10 Alerting & Case Management Settings
     ALERT_RISK_THRESHOLD: float = 40.0
-    ALERT_DEDUP_WINDOW_SECONDS: int = 300  # 5 minutes alert deduplication window
-    CASE_CORRELATION_WINDOW_SECONDS: int = 300  # 5 minutes case correlation window
+    ALERT_DEDUP_WINDOW_SECONDS: int = 300
+    CASE_CORRELATION_WINDOW_SECONDS: int = 300
 
     # CORS Allowed Origins
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-    ]
+    #
+    # Render's environment-variable key field does not allow "_",
+    # so accept both the original name and the Render-compatible name.
+    ALLOWED_ORIGINS: List[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ],
+        validation_alias=AliasChoices(
+            "ALLOWED_ORIGINS",
+            "ALLOWEDORIGINS",
+        ),
+    )
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
     def parse_allowed_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
+            return [
+                origin.strip()
+                for origin in v.split(",")
+                if origin.strip()
+            ]
         return v
 
 
