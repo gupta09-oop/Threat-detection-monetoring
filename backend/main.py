@@ -32,7 +32,10 @@ from backend.detection.clustering_service import behavioral_clustering_service
 from backend.ingestion.consumer import consumer
 
 
-# Basic application logging configuration
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
 logging.basicConfig(
     level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -41,9 +44,13 @@ logging.basicConfig(
 logger = logging.getLogger("sh4d0w_st4lk3r")
 
 
+# ---------------------------------------------------------------------------
+# Application lifespan
+# ---------------------------------------------------------------------------
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan manager to handle startup and shutdown events."""
+    """Application startup and shutdown lifecycle."""
 
     logger.info(
         "Starting up %s (version %s)...",
@@ -51,23 +58,30 @@ async def lifespan(app: FastAPI):
         settings.VERSION,
     )
 
-    # Initialize database and verify connectivity
+    # Initialize database
     init_db()
 
     # Start background ingestion consumer
     await consumer.start()
 
-    # Attempt to load pre-trained ML model artifacts
+    # Load pre-trained ML models if available
     isolation_forest_service.try_load_model()
     behavioral_clustering_service.try_load_model()
 
     yield
 
-    # Gracefully shut down background consumer and drain backlog
+    # Shutdown background consumer
     await consumer.stop()
 
-    logger.info("Shutting down %s...", settings.PROJECT_NAME)
+    logger.info(
+        "Shutting down %s...",
+        settings.PROJECT_NAME,
+    )
 
+
+# ---------------------------------------------------------------------------
+# FastAPI application
+# ---------------------------------------------------------------------------
 
 app = FastAPI(
     title=settings.PROJECT_FULL_TITLE,
@@ -80,21 +94,46 @@ app = FastAPI(
 )
 
 
-# CORS configuration
+# ---------------------------------------------------------------------------
+# CORS
+# ---------------------------------------------------------------------------
+#
+# Production frontend:
+#   https://sh4d0w-st4lk3r.vercel.app
+#
+# The production Vercel origin is explicitly included here so CORS does not
+# depend entirely on Render environment-variable parsing.
+#
+
+allowed_origins = [
+    "https://sh4d0w-st4lk3r.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+# Add any additional origins configured through the environment.
+for origin in settings.ALLOWEDORIGINS.split(","):
+    origin = origin.strip()
+
+    if origin and origin not in allowed_origins:
+        allowed_origins.append(origin)
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in settings.ALLOWEDORIGINS.split(",")
-        if origin.strip()
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Mount API Routers
+# ---------------------------------------------------------------------------
+# API routers
+# ---------------------------------------------------------------------------
+
 app.include_router(health_router)
 app.include_router(events_router)
 app.include_router(features_router)
@@ -112,12 +151,13 @@ app.include_router(reports_router)
 
 
 # ---------------------------------------------------------------------------
-# Production frontend serving
+# Frontend serving
 # ---------------------------------------------------------------------------
 
 FRONTEND_DIST = (
     Path(__file__).resolve().parent.parent / "frontend" / "dist"
 )
+
 
 if FRONTEND_DIST.exists():
     assets_dir = FRONTEND_DIST / "assets"
@@ -131,7 +171,7 @@ if FRONTEND_DIST.exists():
 
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        """Serve React frontend and support React Router client-side routes."""
+        """Serve the React frontend for non-API routes."""
 
         requested_file = FRONTEND_DIST / full_path
 
@@ -140,6 +180,10 @@ if FRONTEND_DIST.exists():
 
         return FileResponse(FRONTEND_DIST / "index.html")
 
+
+# ---------------------------------------------------------------------------
+# Local development entrypoint
+# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     import uvicorn
