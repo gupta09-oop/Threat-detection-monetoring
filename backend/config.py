@@ -1,8 +1,7 @@
 """Configuration and application settings for Sh4d0w_St4lk3r."""
 
-from typing import Dict, List, Union
+from typing import Dict
 
-from pydantic import AliasChoices, Field, field_validator
 # pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -26,8 +25,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     LOG_LEVEL: str = "INFO"
 
-    # Database settings (SQLite for Phase 1 local development,
-    # ready for PostgreSQL/TimescaleDB)
+    # Database settings
     DATABASE_URL: str = "sqlite:///./sh4d0w_st4lk3r.db"
 
     # Ingestion queue and backpressure settings
@@ -81,33 +79,16 @@ class Settings(BaseSettings):
     ALERT_DEDUP_WINDOW_SECONDS: int = 300
     CASE_CORRELATION_WINDOW_SECONDS: int = 300
 
-    # CORS Allowed Origins
+    # CORS
     #
-    # Render's environment-variable key field does not allow "_",
-    # so accept both the original name and the Render-compatible name.
-    ALLOWED_ORIGINS: List[str] = Field(
-        default=[
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-        ],
-        validation_alias=AliasChoices(
-            "ALLOWED_ORIGINS",
-            "ALLOWEDORIGINS",
-        ),
+    # Stored as a comma-separated string so Render can provide it
+    # without requiring an underscore in the environment variable key.
+    ALLOWED_ORIGINS: str = (
+        "http://localhost:3000,"
+        "http://localhost:5173,"
+        "http://127.0.0.1:3000,"
+        "http://127.0.0.1:5173"
     )
-
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_allowed_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        if isinstance(v, str):
-            return [
-                origin.strip()
-                for origin in v.split(",")
-                if origin.strip()
-            ]
-        return v
 
 
 settings = Settings()
